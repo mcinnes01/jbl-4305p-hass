@@ -40,6 +40,15 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             raise JBL4305PConnectionError("Cannot connect to speaker")
         device_name = data.get(CONF_NAME, "JBL 4305P")
 
+    # If user provided a name, update it on the speaker
+    provided_name = data.get(CONF_NAME)
+    if provided_name and provided_name.strip() and provided_name != device_name:
+        try:
+            await client.set_device_name(provided_name.strip())
+            device_name = provided_name.strip()
+        except Exception:  # pylint: disable=broad-except
+            LOGGER.warning("Failed to set device name on speaker; continuing with discovered name")
+
     # Discover available inputs
     inputs = await client.discover_available_inputs()
 

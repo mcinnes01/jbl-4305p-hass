@@ -65,12 +65,13 @@ class JBL4305PInputSelect(CoordinatorEntity[JBL4305PDataUpdateCoordinator], Sele
     @property
     def options(self) -> list[str]:
         """Return list of available input options."""
-        return [info["name"] for info in self._available_inputs.values()]
+        return [info["name"] for info in self._available_inputs.values()] or ["Google Cast", "Bluetooth"]
 
     @property
     def current_option(self) -> str | None:
         """Return the current selected input."""
-        current_input_id = self.coordinator.data.get("current_input")
+        data = self.coordinator.data or {}
+        current_input_id = data.get("current_input")
         
         if not current_input_id:
             return None

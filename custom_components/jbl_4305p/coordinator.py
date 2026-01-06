@@ -41,4 +41,5 @@ class JBL4305PDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 "state": player_state.get("state") if player_state else "unknown",
             }
         except JBL4305PConnectionError as err:
+            # Mark update failed but do not crash; this will make entities unavailable until next success
             raise UpdateFailed(f"Error communicating with API: {err}") from err

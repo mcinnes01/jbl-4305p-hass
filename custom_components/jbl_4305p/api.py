@@ -76,17 +76,22 @@ class JBL4305PClient:
             return False
 
     async def get_device_name(self) -> str | None:
-        """Get device name."""
+        """Get device name from NSDK settings, handling typed values."""
         data = await self.nsdk_get_data("settings:/deviceName")
-        if data and isinstance(data[0], str):
-            return data[0]
+        if not data:
+            return None
+        value = data[0]
+        # Handle either a raw string or typed object {"string_": "name"}
+        if isinstance(value, str):
+            return value
+        if isinstance(value, dict) and value.get("type") == "string_":
+            return value.get("string_")
         return None
 
     async def set_device_name(self, name: str) -> bool:
-        """Set device name."""
-        return await self.nsdk_set_data(
-            "settings:/deviceName", {"string_": name, "type": "string_"}, role="value"
-        )
+        """Set device name via NSDK settings."""
+        payload = {"string_": name, "type": "string_"}
+        return await self.nsdk_set_data("settings:/deviceName", payload, role="value")
 
     async def get_player_state(self) -> dict[str, Any] | None:
         """Get current player state."""

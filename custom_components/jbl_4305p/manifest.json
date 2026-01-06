@@ -1,11 +1,13 @@
 {
   "domain": "jbl_4305p",
   "name": "JBL 4305P Speaker Control",
-  "codeowners": [],
+  "codeowners": ["@mcinnes01"],
   "config_flow": true,
-  "documentation": "https://github.com/yourusername/jbl_4305p",
+  "documentation": "https://github.com/mcinnes01/jbl-4305p-hass",
   "integration_type": "device",
   "iot_class": "local_polling",
   "requirements": [],
-  "version": "1.0.0"
+  "version": "0.1.1",
+  "icon": "icon.svg",
+  "logo": "logo.svg"
 }
