@@ -24,6 +24,6 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
-          ignore: ""
+          ignore: brands
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
