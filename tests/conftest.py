@@ -1,4 +1,5 @@
 """Test fixtures for JBL 4305P tests."""
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
