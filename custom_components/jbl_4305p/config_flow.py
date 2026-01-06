@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 import voluptuous as vol
@@ -12,23 +11,15 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-_LOGGER = logging.getLogger(__name__)
-
-try:
-    from .api import JBL4305PClient, JBL4305PConnectionError
-    from .const import (
-        CONF_LOG_LEVEL,
-        CONF_SCAN_INTERVAL,
-        DEFAULT_LOG_LEVEL,
-        DEFAULT_SCAN_INTERVAL,
-        DOMAIN,
-        LOGGER,
-    )
-
-    _LOGGER.info("JBL 4305P config_flow imports successful")
-except Exception as err:
-    _LOGGER.error("Failed to import JBL 4305P modules: %s", err, exc_info=True)
-    raise
+from .api import JBL4305PClient, JBL4305PConnectionError
+from .const import (
+    CONF_LOG_LEVEL,
+    CONF_SCAN_INTERVAL,
+    DEFAULT_LOG_LEVEL,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    LOGGER,
+)
 
 LOG_LEVELS = ["debug", "info", "warning", "error"]
 

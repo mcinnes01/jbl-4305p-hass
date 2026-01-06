@@ -16,8 +16,6 @@ PLATFORMS: list[Platform] = [Platform.SELECT, Platform.SENSOR, Platform.BUTTON]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up JBL 4305P from a config entry."""
-    from .const import LOGGER
-
     hass.data.setdefault(DOMAIN, {})
 
     session = async_get_clientsession(hass)
@@ -26,13 +24,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     coordinator = JBL4305PDataUpdateCoordinator(hass, client, scan_interval)
 
-    try:
-        await coordinator.async_config_entry_first_refresh()
-    except Exception as err:
-        LOGGER.error(
-            "Failed to connect to JBL 4305P at %s: %s", entry.data[CONF_HOST], err, exc_info=True
-        )
-        raise
+    await coordinator.async_config_entry_first_refresh()
 
     hass.data[DOMAIN][entry.entry_id] = {
         "client": client,

@@ -20,41 +20,18 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up JBL 4305P select entities."""
-    try:
-        coordinator: JBL4305PDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][
-            "coordinator"
-        ]
-        client = hass.data[DOMAIN][entry.entry_id]["client"]
+    coordinator: JBL4305PDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    client = hass.data[DOMAIN][entry.entry_id]["client"]
 
-        # Get available inputs from options
-        available_inputs = entry.options.get("available_inputs", {})
+    # Get available inputs from options
+    available_inputs = entry.options.get("available_inputs", {})
 
-        if not available_inputs:
-            # Fallback: discover inputs if none stored
-            LOGGER.warning("No inputs found in config, discovering...")
-            try:
-                available_inputs = await client.discover_available_inputs()
-                LOGGER.info("Discovered %d inputs", len(available_inputs))
-            except Exception as err:
-                LOGGER.error("Failed to discover inputs: %s", err, exc_info=True)
-                # Provide fallback minimal config
-                available_inputs = {
-                    "googlecast": {
-                        "service_id": "googlecast",
-                        "name": "Google Cast",
-                        "type": "googlecast",
-                    }
-                }
+    if not available_inputs:
+        # Fallback: discover inputs if none stored
+        LOGGER.warning("No inputs found in config, discovering...")
+        available_inputs = await client.discover_available_inputs()
 
-        LOGGER.debug(
-            "Setting up input select with %d inputs: %s",
-            len(available_inputs),
-            list(available_inputs.keys()),
-        )
-        async_add_entities([JBL4305PInputSelect(coordinator, client, entry, available_inputs)])
-    except Exception as err:
-        LOGGER.error("Failed to set up select platform: %s", err, exc_info=True)
-        raise
+    async_add_entities([JBL4305PInputSelect(coordinator, client, entry, available_inputs)])
 
 
 class JBL4305PInputSelect(CoordinatorEntity[JBL4305PDataUpdateCoordinator], SelectEntity):

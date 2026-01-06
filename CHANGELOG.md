@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.6] - 2026-01-06
+### Fixed
+- Revert to last known working config flow (v0.1.2 state)
+- Remove debug code that was causing 500 errors
+- Restore stable setup flow
+
 ## [0.1.5] - 2026-01-06
 ### Debug
 - Add import-time error logging to config_flow
