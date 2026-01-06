@@ -22,6 +22,7 @@ class JBL4305PDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     ) -> None:
         """Initialize."""
         self.client = client
+        self._last_bt_device_path: str | None = None
         super().__init__(
             hass,
             LOGGER,
@@ -36,6 +37,17 @@ class JBL4305PDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             current_input = await self.client.get_current_input()
             system_info = await self.client.get_system_info()
             versions_net = await self.client.get_versions_and_network()
+
+            # Track last seen Bluetooth device path
+            if player_state:
+                media_roles = player_state.get("mediaRoles", {})
+                media_data = media_roles.get("mediaData", {})
+                meta = media_data.get("metaData", {})
+                if meta.get("serviceID") == "bluetooth":
+                    val = media_roles.get("value", {})
+                    path = val.get("string_")
+                    if path:
+                        self._last_bt_device_path = path
             
             return {
                 "player_state": player_state or {},
@@ -43,6 +55,7 @@ class JBL4305PDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 "state": player_state.get("state") if player_state else "unknown",
                 "system": system_info,
                 "versions": versions_net,
+                "last_bt_device_path": self._last_bt_device_path,
             }
         except JBL4305PConnectionError as err:
             # Mark update failed but do not crash; this will make entities unavailable until next success

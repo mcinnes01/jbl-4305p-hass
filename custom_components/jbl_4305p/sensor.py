@@ -41,6 +41,9 @@ async def async_setup_entry(
     for key, name, device_class in SENSORS:
         entities.append(JBL4305PSensor(coordinator, entry, key, name, device_class))
 
+    # Current input sensor
+    entities.append(JBL4305PCurrentInputSensor(coordinator, entry))
+
     async_add_entities(entities)
 
 
@@ -81,3 +84,33 @@ class JBL4305PSensor(CoordinatorEntity[JBL4305PDataUpdateCoordinator], SensorEnt
         # Fallback to parsed versions/network info
         vers = data.get("versions", {})
         return vers.get(self._key)
+
+
+class JBL4305PCurrentInputSensor(CoordinatorEntity[JBL4305PDataUpdateCoordinator], SensorEntity):
+    """Expose current input as a sensor."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Current Input"
+
+    def __init__(self, coordinator: JBL4305PDataUpdateCoordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator)
+        self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_current_input"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, entry.entry_id)},
+            "name": entry.data.get("name", "JBL 4305P"),
+            "manufacturer": "JBL",
+            "model": "4305P",
+        }
+
+    @property
+    def native_value(self):
+        data = self.coordinator.data or {}
+        current_id = data.get("current_input")
+        if not current_id:
+            return None
+        # Map to friendly name from options
+        inputs = self._entry.options.get("available_inputs", {})
+        if current_id in inputs:
+            return inputs[current_id].get("name")
+        return current_id

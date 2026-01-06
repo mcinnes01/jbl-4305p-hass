@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN
+from .coordinator import JBL4305PDataUpdateCoordinator
 
 
 async def async_setup_entry(
@@ -16,7 +17,11 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    async_add_entities([RediscoverInputsButton(hass, entry)])
+    async_add_entities([
+        RediscoverInputsButton(hass, entry),
+        SwitchToGoogleCastButton(hass, entry),
+        SwitchToLastBluetoothButton(hass, entry),
+    ])
 
 
 class RediscoverInputsButton(ButtonEntity):
@@ -46,3 +51,51 @@ class RediscoverInputsButton(ButtonEntity):
             {"entry_id": self.entry.entry_id},
             blocking=True,
         )
+
+
+class SwitchToGoogleCastButton(ButtonEntity):
+    """Button to switch input to Google Cast."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Switch to Google Cast"
+    _attr_icon = "mdi:cast"
+
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        self.hass = hass
+        self.entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_switch_googlecast"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, entry.entry_id)},
+            "name": entry.data.get("name", "JBL 4305P"),
+            "manufacturer": "JBL",
+            "model": "4305P",
+        }
+
+    async def async_press(self) -> None:
+        client = self.hass.data[DOMAIN][self.entry.entry_id]["client"]
+        await client.switch_input("googlecast")
+
+
+class SwitchToLastBluetoothButton(ButtonEntity):
+    """Button to switch input to last seen Bluetooth device."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Switch to Bluetooth (last)"
+    _attr_icon = "mdi:bluetooth"
+
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        self.hass = hass
+        self.entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_switch_bluetooth_last"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, entry.entry_id)},
+            "name": entry.data.get("name", "JBL 4305P"),
+            "manufacturer": "JBL",
+            "model": "4305P",
+        }
+
+    async def async_press(self) -> None:
+        client = self.hass.data[DOMAIN][self.entry.entry_id]["client"]
+        coordinator: JBL4305PDataUpdateCoordinator = self.hass.data[DOMAIN][self.entry.entry_id]["coordinator"]
+        last_path = (coordinator.data or {}).get("last_bt_device_path")
+        await client.switch_input("bluetooth", device_path=last_path)
