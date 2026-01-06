@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2026-01-06
+### Fixed
+- Bluetooth device path parsing (use parts[-1] instead of parts[-2])
+- MAC address now consistently lowercase in all methods
+- Manifest key order for hassfest validation
+- HACS validation with brands check ignored (standard for custom integrations)
+- Code formatting with ruff
+- Test suite mock response structures
+- Added homeassistant dependency to test workflow
+
 ## [0.1.1] - 2026-01-06
 - Initial public release
 - Input Source select entity
