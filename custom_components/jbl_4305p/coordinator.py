@@ -37,7 +37,13 @@ class JBL4305PDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             player_state = await self.client.get_player_state()
             current_input = await self.client.get_current_input()
             system_info = await self.client.get_system_info()
-            versions_net = await self.client.get_versions_and_network()
+
+            # Try to get versions/network but don't fail setup if it errors
+            versions_net = {}
+            try:
+                versions_net = await self.client.get_versions_and_network()
+            except Exception as err:
+                LOGGER.debug("Failed to fetch versions/network info: %s", err)
 
             # Track last seen Bluetooth device path
             if player_state:
