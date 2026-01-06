@@ -1,4 +1,5 @@
 """API client for JBL 4305P speakers."""
+
 from __future__ import annotations
 
 import json
@@ -28,9 +29,7 @@ class JBL4305PClient:
         self.session = session
         self.base_url = f"http://{host}"
 
-    async def nsdk_get_data(
-        self, path: str, roles: str = "value"
-    ) -> list[dict[str, Any]]:
+    async def nsdk_get_data(self, path: str, roles: str = "value") -> list[dict[str, Any]]:
         """Get data from NSDK API."""
         url = f"{self.base_url}/api/getData"
         params = {
@@ -55,9 +54,7 @@ class JBL4305PClient:
         except TimeoutError as err:
             raise JBL4305PConnectionError("Request timeout") from err
 
-    async def nsdk_set_data(
-        self, path: str, value: Any, role: str = "activate"
-    ) -> bool:
+    async def nsdk_set_data(self, path: str, value: Any, role: str = "activate") -> bool:
         """Set data via NSDK API."""
         url = f"{self.base_url}/api/setData"
         params = {
@@ -233,9 +230,7 @@ class JBL4305PClient:
 
         return inputs
 
-    async def switch_input(
-        self, service_id: str, device_path: str | None = None
-    ) -> bool:
+    async def switch_input(self, service_id: str, device_path: str | None = None) -> bool:
         """Switch to specified input."""
         if service_id == "googlecast":
             payload = {

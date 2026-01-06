@@ -1,4 +1,5 @@
 """Select platform for JBL 4305P."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -19,9 +20,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up JBL 4305P select entities."""
-    coordinator: JBL4305PDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id][
-        "coordinator"
-    ]
+    coordinator: JBL4305PDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
     client = hass.data[DOMAIN][entry.entry_id]["client"]
 
     # Get available inputs from options
@@ -65,7 +64,10 @@ class JBL4305PInputSelect(CoordinatorEntity[JBL4305PDataUpdateCoordinator], Sele
     @property
     def options(self) -> list[str]:
         """Return list of available input options."""
-        return [info["name"] for info in self._available_inputs.values()] or ["Google Cast", "Bluetooth"]
+        return [info["name"] for info in self._available_inputs.values()] or [
+            "Google Cast",
+            "Bluetooth",
+        ]
 
     @property
     def current_option(self) -> str | None:

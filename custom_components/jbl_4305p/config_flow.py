@@ -1,4 +1,5 @@
 """Config flow for JBL 4305P integration."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -62,9 +63,7 @@ class JBL4305PConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, str] = {}
 
@@ -105,12 +104,10 @@ class JBL4305PConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 {
                     vol.Required(CONF_HOST): str,
                     vol.Optional(CONF_NAME): str,
-                    vol.Optional(
-                        CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL
-                    ): vol.All(vol.Coerce(int), vol.Range(min=10, max=300)),
-                    vol.Optional(CONF_LOG_LEVEL, default=DEFAULT_LOG_LEVEL): vol.In(
-                        LOG_LEVELS
+                    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(
+                        vol.Coerce(int), vol.Range(min=10, max=300)
                     ),
+                    vol.Optional(CONF_LOG_LEVEL, default=DEFAULT_LOG_LEVEL): vol.In(LOG_LEVELS),
                 }
             ),
             errors=errors,
@@ -132,9 +129,7 @@ class JBL4305POptionsFlow(config_entries.OptionsFlow):
         """Initialize options flow."""
         self.config_entry = config_entry
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Manage the options."""
         errors: dict[str, str] = {}
 
@@ -143,9 +138,7 @@ class JBL4305POptionsFlow(config_entries.OptionsFlow):
             if user_input.get("rediscover_inputs", False):
                 try:
                     session = async_get_clientsession(self.hass)
-                    client = JBL4305PClient(
-                        self.config_entry.data[CONF_HOST], session
-                    )
+                    client = JBL4305PClient(self.config_entry.data[CONF_HOST], session)
                     inputs = await client.discover_available_inputs()
                     user_input["available_inputs"] = inputs
                 except JBL4305PConnectionError:
@@ -174,9 +167,7 @@ class JBL4305POptionsFlow(config_entries.OptionsFlow):
                     ): vol.All(vol.Coerce(int), vol.Range(min=10, max=300)),
                     vol.Optional(
                         CONF_LOG_LEVEL,
-                        default=self.config_entry.options.get(
-                            CONF_LOG_LEVEL, DEFAULT_LOG_LEVEL
-                        ),
+                        default=self.config_entry.options.get(CONF_LOG_LEVEL, DEFAULT_LOG_LEVEL),
                     ): vol.In(LOG_LEVELS),
                     vol.Optional("rediscover_inputs", default=False): bool,
                 }

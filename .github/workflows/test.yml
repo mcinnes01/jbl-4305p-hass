@@ -17,6 +17,6 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: |
-          pip install pytest pytest-aiohttp pytest-asyncio aiohttp
+          pip install pytest pytest-aiohttp pytest-asyncio aiohttp homeassistant
       - name: Run pytest
         run: pytest tests/ -v

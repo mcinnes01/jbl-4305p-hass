@@ -1,4 +1,5 @@
 """Button entities for JBL 4305P."""
+
 from __future__ import annotations
 
 from homeassistant.components.button import ButtonEntity
@@ -15,12 +16,14 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    async_add_entities([
-        RediscoverInputsButton(hass, entry),
-        SwitchToGoogleCastButton(hass, entry),
-        SwitchToLastBluetoothButton(hass, entry),
-        AddCurrentBluetoothButton(hass, entry),
-    ])
+    async_add_entities(
+        [
+            RediscoverInputsButton(hass, entry),
+            SwitchToGoogleCastButton(hass, entry),
+            SwitchToLastBluetoothButton(hass, entry),
+            AddCurrentBluetoothButton(hass, entry),
+        ]
+    )
 
 
 class RediscoverInputsButton(ButtonEntity):
@@ -95,7 +98,9 @@ class SwitchToLastBluetoothButton(ButtonEntity):
 
     async def async_press(self) -> None:
         client = self.hass.data[DOMAIN][self.entry.entry_id]["client"]
-        coordinator: JBL4305PDataUpdateCoordinator = self.hass.data[DOMAIN][self.entry.entry_id]["coordinator"]
+        coordinator: JBL4305PDataUpdateCoordinator = self.hass.data[DOMAIN][self.entry.entry_id][
+            "coordinator"
+        ]
         last_path = (coordinator.data or {}).get("last_bt_device_path")
         await client.switch_input("bluetooth", device_path=last_path)
 
