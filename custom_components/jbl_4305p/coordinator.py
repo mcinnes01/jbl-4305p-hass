@@ -1,0 +1,44 @@
+"""DataUpdateCoordinator for JBL 4305P."""
+from __future__ import annotations
+
+from datetime import timedelta
+from typing import Any
+
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+
+from .api import JBL4305PClient, JBL4305PConnectionError
+from .const import LOGGER
+
+
+class JBL4305PDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
+    """Class to manage fetching JBL 4305P data."""
+
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        client: JBL4305PClient,
+        update_interval: int,
+    ) -> None:
+        """Initialize."""
+        self.client = client
+        super().__init__(
+            hass,
+            LOGGER,
+            name="JBL 4305P",
+            update_interval=timedelta(seconds=update_interval),
+        )
+
+    async def _async_update_data(self) -> dict[str, Any]:
+        """Update data via library."""
+        try:
+            player_state = await self.client.get_player_state()
+            current_input = await self.client.get_current_input()
+            
+            return {
+                "player_state": player_state or {},
+                "current_input": current_input,
+                "state": player_state.get("state") if player_state else "unknown",
+            }
+        except JBL4305PConnectionError as err:
+            raise UpdateFailed(f"Error communicating with API: {err}") from err
