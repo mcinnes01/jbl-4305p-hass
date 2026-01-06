@@ -1,0 +1,39 @@
+name: Release Validation
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  validate-version:
+    name: Verify tag matches manifest version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Extract manifest version
+        id: manifest
+        run: |
+          python3 - <<'PY'
+          import json
+          with open('custom_components/jbl_4305p/manifest.json', 'r') as f:
+              data = json.load(f)
+          print(f"version={data.get('version', '')}")
+          PY
+      - name: Fail if mismatch
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          MANIFEST_VERSION=$(python3 -c "import json;print(json.load(open('custom_components/jbl_4305p/manifest.json'))['version'])")
+          echo "Tag: $TAG"
+          echo "Manifest: $MANIFEST_VERSION"
+          if [ "$TAG" != "$MANIFEST_VERSION" ]; then
+            echo "Version mismatch: tag '$TAG' != manifest '$MANIFEST_VERSION'"
+            exit 1
+          fi
+      - name: Check CHANGELOG has section
+        run: |
+          TAG_NO_V="${GITHUB_REF_NAME#v}"
+          if ! grep -q "^## \[$TAG_NO_V\]" CHANGELOG.md; then
+            echo "CHANGELOG.md missing section for $TAG_NO_V" && exit 1
+          fi

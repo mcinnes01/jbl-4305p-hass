@@ -1,5 +1,7 @@
 # JBL 4305P Home Assistant Integration
 
+[![CI](https://github.com/mcinnes01/jbl-4305p-hass/actions/workflows/ci.yml/badge.svg)](https://github.com/mcinnes01/jbl-4305p-hass/actions/workflows/ci.yml) [![Release](https://img.shields.io/github/v/release/mcinnes01/jbl-4305p-hass)](https://github.com/mcinnes01/jbl-4305p-hass/releases)
+
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/custom-components/hacs)
 
 Custom Home Assistant integration for controlling JBL 4305P powered speakers via their local NSDK API.
