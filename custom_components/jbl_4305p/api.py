@@ -7,6 +7,7 @@ import time
 from typing import Any
 
 import aiohttp
+import re
 
 from .const import LOGGER
 
@@ -97,6 +98,56 @@ class JBL4305PClient:
         """Get current player state."""
         data = await self.nsdk_get_data("player:player/data")
         return data[0] if data else None
+
+    async def get_system_info(self) -> dict[str, Any]:
+        """Get system info from NSDK settings if available."""
+        info: dict[str, Any] = {}
+        # Known settings
+        for path, key in [
+            ("settings:/system/primaryMacAddress", "mac"),
+            ("settings:/system/serialNumber", "serial"),
+            ("settings:/system/deviceUptime", "uptime"),
+            ("settings:/googlecast/castVersion", "cast_version"),
+        ]:
+            try:
+                val = await self.nsdk_get_data(path)
+                if val:
+                    v = val[0]
+                    if isinstance(v, dict) and "type" in v:
+                        info[key] = v.get(v.get("type"))
+                    else:
+                        info[key] = v
+            except Exception:  # best effort
+                pass
+        return info
+
+    async def get_versions_and_network(self) -> dict[str, Any]:
+        """Parse index.fcgi for device version and network info as fallback."""
+        out: dict[str, Any] = {}
+        try:
+            async with self.session.get(f"{self.base_url}/index.fcgi", timeout=10) as resp:
+                text = await resp.text()
+        except Exception as err:  # noqa: BLE001
+            LOGGER.debug("Failed to fetch index.fcgi: %s", err)
+            return out
+
+        # Regex extraction
+        m = re.search(r"Device version:\s*([^<\n]+)", text)
+        if m:
+            out["device_version"] = m.group(1).strip()
+        m = re.search(r"AirPlay version:\s*([^<\n]+)", text)
+        if m:
+            out["airplay_version"] = m.group(1).strip()
+        m = re.search(r"IP:\s*([\d\.]+/\d+)", text)
+        if m:
+            out["ip_cidr"] = m.group(1).strip()
+        m = re.search(r"Gateway:\s*([\d\.]+)", text)
+        if m:
+            out["gateway"] = m.group(1).strip()
+        m = re.search(r"DNS:\s*([^<\n]+)", text)
+        if m:
+            out["dns"] = ", ".join([d.strip() for d in m.group(1).split(",")])
+        return out
 
     async def discover_bluetooth_devices(self) -> dict[str, dict[str, Any]]:
         """Discover paired Bluetooth devices from player state and logs."""

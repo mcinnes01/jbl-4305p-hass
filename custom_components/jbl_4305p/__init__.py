@@ -10,7 +10,7 @@ from .api import JBL4305PClient
 from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .coordinator import JBL4305PDataUpdateCoordinator
 
-PLATFORMS: list[Platform] = [Platform.SELECT]
+PLATFORMS: list[Platform] = [Platform.SELECT, Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -33,6 +33,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
+
+    # Register services once (idempotent)
+    async def _async_rediscover_inputs(call):
+        """Service to rediscover inputs for a given config entry."""
+        target_entry_id = call.data.get("entry_id", entry.entry_id)
+        # If a different entry is requested, ignore in this instance
+        if target_entry_id != entry.entry_id:
+            return
+        client = hass.data[DOMAIN][entry.entry_id]["client"]
+        inputs = await client.discover_available_inputs()
+        # Update options with new inputs and trigger reload via update listener
+        new_options = dict(entry.options)
+        new_options["available_inputs"] = inputs
+        hass.config_entries.async_update_entry(entry, options=new_options)
+
+    if not hass.services.has_service(DOMAIN, "rediscover_inputs"):
+        hass.services.async_register(
+            DOMAIN,
+            "rediscover_inputs",
+            _async_rediscover_inputs,
+        )
 
     return True
 

@@ -34,11 +34,15 @@ class JBL4305PDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         try:
             player_state = await self.client.get_player_state()
             current_input = await self.client.get_current_input()
+            system_info = await self.client.get_system_info()
+            versions_net = await self.client.get_versions_and_network()
             
             return {
                 "player_state": player_state or {},
                 "current_input": current_input,
                 "state": player_state.get("state") if player_state else "unknown",
+                "system": system_info,
+                "versions": versions_net,
             }
         except JBL4305PConnectionError as err:
             # Mark update failed but do not crash; this will make entities unavailable until next success
