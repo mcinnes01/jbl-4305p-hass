@@ -1,7 +1,5 @@
 {
   "name": "JBL 4305P Speaker Control",
   "render_readme": true,
-  "domains": ["select", "sensor", "button"],
-  "iot_class": "Local Polling",
   "homeassistant": "2026.1.0"
 }
