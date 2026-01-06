@@ -167,8 +167,8 @@ class JBL4305PClient:
                 if device_path:
                     # Extract MAC from path: /org/bluez/hci0/dev_XX_XX_XX_XX_XX_XX
                     parts = device_path.split("/")
-                    if len(parts) >= 5 and parts[-2].startswith("dev_"):
-                        mac = parts[-2].replace("dev_", "").replace("_", ":")
+                    if len(parts) >= 5 and parts[-1].startswith("dev_"):
+                        mac = parts[-1].replace("dev_", "").replace("_", ":")
                         devices[device_path] = {
                             "name": title,
                             "mac": mac,
@@ -307,8 +307,8 @@ class JBL4305PClient:
             device_path = value.get("string_")
             if device_path:
                 parts = device_path.split("/")
-                if len(parts) >= 5 and parts[-2].startswith("dev_"):
-                    mac = parts[-2].replace("dev_", "").replace("_", ":").lower()
+                if len(parts) >= 5 and parts[-1].startswith("dev_"):
+                    mac = parts[-1].replace("dev_", "").replace("_", ":").lower()
                     return f"bluetooth_{mac.replace(':', '_')}"
 
         return service_id
