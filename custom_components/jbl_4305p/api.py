@@ -168,7 +168,7 @@ class JBL4305PClient:
                     # Extract MAC from path: /org/bluez/hci0/dev_XX_XX_XX_XX_XX_XX
                     parts = device_path.split("/")
                     if len(parts) >= 5 and parts[-1].startswith("dev_"):
-                        mac = parts[-1].replace("dev_", "").replace("_", ":")
+                        mac = parts[-1].replace("dev_", "").replace("_", ":").lower()
                         devices[device_path] = {
                             "name": title,
                             "mac": mac,
