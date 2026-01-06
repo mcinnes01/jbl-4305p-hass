@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5] - 2026-01-06
+### Debug
+- Add import-time error logging to config_flow
+- Add comprehensive error logging to select platform setup
+- Improved error visibility and fallback handling for input discovery
+
 ## [0.1.4] - 2026-01-06
 ### Fixed
 - Make versions/network fetch non-blocking to prevent setup failures
