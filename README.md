@@ -24,6 +24,21 @@ Custom Home Assistant integration for controlling JBL 4305P powered speakers via
 4. Add `https://github.com/mcinnes01/jbl-4305p-hass` and select "Integration" as the category
 5. Click "Install"
 6. Restart Home Assistant
+### Release process
+
+When you’re ready to publish a new version:
+
+1. Update CHANGELOG.md with a new section:
+  - `## [0.1.2] - YYYY-MM-DD`
+  - Add bullet points of changes
+2. Run the workflow "Prepare Release" from the GitHub Actions tab
+  - Inputs: version (e.g., 0.1.2), optional notes (used if CHANGELOG section missing)
+  - The workflow will:
+    - Update `manifest.json` version
+    - Commit and tag `v0.1.2`
+    - Create the GitHub Release with notes
+3. HACS will detect the new release and show an update in Home Assistant
+
 
 ### Manual Installation
 

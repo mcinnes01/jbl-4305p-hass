@@ -1,0 +1,83 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "New version (e.g., 0.1.2)"
+        required: true
+        type: string
+      notes:
+        description: "Optional release notes if CHANGELOG section is missing"
+        required: false
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate version format
+        id: validate
+        run: |
+          V=${{ inputs.version }}
+          if ! echo "$V" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "Invalid version: $V (expected semver like 0.1.2)" && exit 1
+          fi
+
+      - name: Update manifest.json version
+        run: |
+          python3 - <<'PY'
+          import json
+          import sys
+          v = sys.argv[1]
+          p = 'custom_components/jbl_4305p/manifest.json'
+          data = json.load(open(p))
+          data['version'] = v
+          json.dump(data, open(p, 'w'), indent=2)
+          print('Updated manifest.json to', v)
+          PY
+          '${{ inputs.version }}'
+
+      - name: Extract notes from CHANGELOG (if present)
+        id: notes
+        run: |
+          V=${{ inputs.version }}
+          if grep -q "^## \[$V\]" CHANGELOG.md; then
+            awk -v ver="## [$V]" 'found{if($0 ~ /^## \[/){exit} else print} $0==ver{found=1}' CHANGELOG.md > changelog_section.txt
+            echo "changelog_body<<EOF" >> $GITHUB_OUTPUT
+            cat changelog_section.txt >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "changelog_body=${{ inputs.notes }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit manifest change
+        run: |
+          git add custom_components/jbl_4305p/manifest.json
+          git commit -m "chore(release): v${{ inputs.version }}" || echo "No changes to commit"
+
+      - name: Create tag
+        run: |
+          git tag v${{ inputs.version }} || echo "Tag exists"
+
+      - name: Push changes and tag
+        run: |
+          git push origin HEAD
+          git push origin --tags
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          name: v${{ inputs.version }}
+          body: ${{ steps.notes.outputs.changelog_body }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
