@@ -21,6 +21,7 @@ async def async_setup_entry(
         RediscoverInputsButton(hass, entry),
         SwitchToGoogleCastButton(hass, entry),
         SwitchToLastBluetoothButton(hass, entry),
+        AddCurrentBluetoothButton(hass, entry),
     ])
 
 
@@ -99,3 +100,30 @@ class SwitchToLastBluetoothButton(ButtonEntity):
         coordinator: JBL4305PDataUpdateCoordinator = self.hass.data[DOMAIN][self.entry.entry_id]["coordinator"]
         last_path = (coordinator.data or {}).get("last_bt_device_path")
         await client.switch_input("bluetooth", device_path=last_path)
+
+
+class AddCurrentBluetoothButton(ButtonEntity):
+    """Button to add the currently connected Bluetooth device as an input option."""
+
+    _attr_has_entity_name = True
+    _attr_name = "Add current Bluetooth device"
+    _attr_icon = "mdi:bluetooth-connect"
+
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
+        self.hass = hass
+        self.entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_add_bt_device"
+        self._attr_device_info = {
+            "identifiers": {(DOMAIN, entry.entry_id)},
+            "name": entry.data.get("name", "JBL 4305P"),
+            "manufacturer": "JBL",
+            "model": "4305P",
+        }
+
+    async def async_press(self) -> None:
+        await self.hass.services.async_call(
+            DOMAIN,
+            "add_bluetooth_device",
+            {"entry_id": self.entry.entry_id},
+            blocking=True,
+        )

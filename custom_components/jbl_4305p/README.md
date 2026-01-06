@@ -9,6 +9,7 @@ Custom Home Assistant integration for controlling JBL 4305P powered speakers via
 - 🔄 **Real-time Updates**: Monitors current input and playback state
 - ⚙️ **Configurable**: Set custom update intervals and log levels
 - 📱 **Multiple Speakers**: Support for multiple JBL 4305P speakers on your network
+- 🧩 **Input Factory**: Add the currently connected Bluetooth device as a permanent input option via a button or service
 
 ## Installation
 
@@ -60,6 +61,27 @@ After adding the integration, you can configure additional options:
    - **Update Interval**: How often to poll the speaker (10-300 seconds)
    - **Log Level**: Set logging verbosity (debug, info, warning, error)
    - **Rediscover Inputs**: Enable this to rescan for new Bluetooth devices or inputs
+
+  ### Input Factory (Bluetooth)
+
+  To add the currently connected Bluetooth device as a selectable input:
+
+  1. Manually connect/pair the device to the speaker and start audio
+  2. Go to the JBL 4305P device page in Home Assistant
+  3. Press the button "Add current Bluetooth device"
+  4. The integration will store the device path and create a new input option (e.g., "Bluetooth - Lounge TV")
+
+  You can repeat this flow to add more devices. If you prefer services:
+
+  ```yaml
+  service: jbl_4305p.add_bluetooth_device
+  data:
+    entry_id: YOUR_ENTRY_ID   # optional, if you have multiple speakers
+    name: "Custom Friendly Name"  # optional
+    device_path: "/org/bluez/hci0/dev_64_E7_D8_6D_AD_C3"  # optional override
+  ```
+
+  Use "Rediscover Inputs" to re-scan and populate inputs based on recent activity when you don’t want to add them individually.
 
 ## Usage
 
