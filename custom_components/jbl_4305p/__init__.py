@@ -10,7 +10,7 @@ from .api import JBL4305PClient
 from .const import CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .coordinator import JBL4305PDataUpdateCoordinator
 
-PLATFORMS: list[Platform] = [Platform.SELECT, Platform.SENSOR]
+PLATFORMS: list[Platform] = [Platform.SELECT, Platform.SENSOR, Platform.BUTTON]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
