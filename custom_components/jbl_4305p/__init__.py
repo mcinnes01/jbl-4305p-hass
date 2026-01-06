@@ -19,7 +19,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     session = async_get_clientsession(hass)
     client = JBL4305PClient(entry.data[CONF_HOST], session)
-    
+
     scan_interval = entry.options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
     coordinator = JBL4305PDataUpdateCoordinator(hass, client, scan_interval)
 
@@ -31,7 +31,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    
+
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
 
     # Register services once (idempotent)
@@ -79,7 +79,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if not device_path:
             # Prefer last seen Bluetooth device path from coordinator
             device_path = (coordinator.data or {}).get("last_bt_device_path")
-        
+
         # If still missing, try current player state
         if not device_path:
             state = await client.get_player_state()

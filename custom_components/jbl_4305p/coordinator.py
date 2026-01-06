@@ -48,7 +48,7 @@ class JBL4305PDataUpdateCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     path = val.get("string_")
                     if path:
                         self._last_bt_device_path = path
-            
+
             return {
                 "player_state": player_state or {},
                 "current_input": current_input,

@@ -23,10 +23,10 @@ async def async_setup_entry(
         "coordinator"
     ]
     client = hass.data[DOMAIN][entry.entry_id]["client"]
-    
+
     # Get available inputs from options
     available_inputs = entry.options.get("available_inputs", {})
-    
+
     if not available_inputs:
         # Fallback: discover inputs if none stored
         LOGGER.warning("No inputs found in config, discovering...")
@@ -72,10 +72,10 @@ class JBL4305PInputSelect(CoordinatorEntity[JBL4305PDataUpdateCoordinator], Sele
         """Return the current selected input."""
         data = self.coordinator.data or {}
         current_input_id = data.get("current_input")
-        
+
         if not current_input_id:
             return None
-        
+
         # Find the input info by ID
         input_info = self._available_inputs.get(current_input_id)
         return input_info["name"] if input_info else None
@@ -83,26 +83,24 @@ class JBL4305PInputSelect(CoordinatorEntity[JBL4305PDataUpdateCoordinator], Sele
     async def async_select_option(self, option: str) -> None:
         """Change the selected input."""
         # Find the input ID by name
-        input_id = None
         input_info = None
-        
-        for inp_id, info in self._available_inputs.items():
+
+        for _inp_id, info in self._available_inputs.items():
             if info["name"] == option:
-                input_id = inp_id
                 input_info = info
                 break
-        
+
         if not input_info:
             LOGGER.error("Unknown input option: %s", option)
             return
-        
+
         service_id = input_info["service_id"]
         device_path = input_info.get("device_path")
-        
+
         LOGGER.info("Switching to input: %s (service: %s)", option, service_id)
-        
+
         success = await self._client.switch_input(service_id, device_path)
-        
+
         if success:
             # Update coordinator data
             await self.coordinator.async_request_refresh()

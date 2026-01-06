@@ -1,13 +1,12 @@
 """API client for JBL 4305P speakers."""
 from __future__ import annotations
 
-import asyncio
 import json
+import re
 import time
 from typing import Any
 
 import aiohttp
-import re
 
 from .const import LOGGER
 
@@ -44,16 +43,16 @@ class JBL4305PClient:
             async with self.session.get(url, params=params, timeout=10) as resp:
                 resp.raise_for_status()
                 data = await resp.json()
-                
+
                 if isinstance(data, dict) and "error" in data:
                     error_msg = data["error"].get("message", "Unknown error")
                     LOGGER.debug("NSDK API error for path %s: %s", path, error_msg)
                     return []
-                
+
                 return data if isinstance(data, list) else []
         except aiohttp.ClientError as err:
             raise JBL4305PConnectionError(f"Connection error: {err}") from err
-        except asyncio.TimeoutError as err:
+        except TimeoutError as err:
             raise JBL4305PConnectionError("Request timeout") from err
 
     async def nsdk_set_data(
@@ -152,22 +151,22 @@ class JBL4305PClient:
     async def discover_bluetooth_devices(self) -> dict[str, dict[str, Any]]:
         """Discover paired Bluetooth devices from player state and logs."""
         devices = {}
-        
+
         # Get current player state to check for active Bluetooth device
         player_state = await self.get_player_state()
-        
+
         if player_state and player_state.get("state") != "stopped":
             media_roles = player_state.get("mediaRoles", {})
             media_data = media_roles.get("mediaData", {})
             meta_data = media_data.get("metaData", {})
-            
+
             # Check if current input is Bluetooth
             if meta_data.get("serviceID") == "bluetooth":
                 # Extract device path from value
                 value = media_roles.get("value", {})
                 device_path = value.get("string_")
                 title = media_roles.get("title", "Unknown Device")
-                
+
                 if device_path:
                     # Extract MAC from path: /org/bluez/hci0/dev_XX_XX_XX_XX_XX_XX
                     parts = device_path.split("/")
@@ -178,20 +177,20 @@ class JBL4305PClient:
                             "mac": mac,
                             "path": device_path,
                         }
-        
+
         return devices
 
     async def discover_available_inputs(self) -> dict[str, dict[str, Any]]:
         """Discover all available inputs on the speaker."""
         inputs = {}
-        
+
         # Add Google Cast (always available if speaker supports it)
         inputs["googlecast"] = {
             "service_id": "googlecast",
             "name": "Google Cast",
             "type": "googlecast",
         }
-        
+
         # Check for Bluetooth devices
         bt_devices = await self.discover_bluetooth_devices()
         for device_path, device_info in bt_devices.items():
@@ -203,7 +202,7 @@ class JBL4305PClient:
                 "device_path": device_path,
                 "device_name": device_info["name"],
             }
-        
+
         # Add generic Bluetooth option if no specific devices found
         if not bt_devices:
             inputs["bluetooth"] = {
@@ -211,7 +210,7 @@ class JBL4305PClient:
                 "name": "Bluetooth",
                 "type": "bluetooth",
             }
-        
+
         # Check for other services by probing paths
         # Note: These may return errors if not available, which is expected
         other_services = {
@@ -221,7 +220,7 @@ class JBL4305PClient:
             "tidalConnect": "Tidal Connect",
             "upnpRenderer": "UPnP/DLNA",
         }
-        
+
         for service_id, service_name in other_services.items():
             # Try to read service config to see if it exists
             data = await self.nsdk_get_data(f"settings:/{service_id}")
@@ -231,7 +230,7 @@ class JBL4305PClient:
                     "name": service_name,
                     "type": service_id,
                 }
-        
+
         return inputs
 
     async def switch_input(
@@ -271,7 +270,7 @@ class JBL4305PClient:
                     "doNotTrack": True,
                 },
             }
-            
+
             # Add device path if provided
             if device_path:
                 payload["mediaRoles"]["value"] = {
@@ -298,15 +297,15 @@ class JBL4305PClient:
     async def get_current_input(self) -> str | None:
         """Get current active input service ID."""
         player_state = await self.get_player_state()
-        
+
         if not player_state or player_state.get("state") == "stopped":
             return None
-        
+
         media_roles = player_state.get("mediaRoles", {})
         media_data = media_roles.get("mediaData", {})
         meta_data = media_data.get("metaData", {})
         service_id = meta_data.get("serviceID")
-        
+
         # For Bluetooth, include device path in ID
         if service_id == "bluetooth":
             value = media_roles.get("value", {})
@@ -316,5 +315,5 @@ class JBL4305PClient:
                 if len(parts) >= 5 and parts[-2].startswith("dev_"):
                     mac = parts[-2].replace("dev_", "").replace("_", ":").lower()
                     return f"bluetooth_{mac.replace(':', '_')}"
-        
+
         return service_id

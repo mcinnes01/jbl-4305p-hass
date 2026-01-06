@@ -3,9 +3,7 @@ from __future__ import annotations
 
 from typing import Any
 
-import aiohttp
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_NAME
 from homeassistant.core import HomeAssistant, callback
@@ -32,7 +30,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 
     # Test connection by getting device name
     device_name = await client.get_device_name()
-    
+
     if not device_name:
         # Try to get player data as fallback
         player_state = await client.get_player_state()
