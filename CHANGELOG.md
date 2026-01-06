@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.4] - 2026-01-06
+### Fixed
+- Make versions/network fetch non-blocking to prevent setup failures
+- Add explicit error logging during coordinator first refresh
+- Improved error visibility for setup debugging
+
+## [0.1.3] - 2026-01-06
+### Fixed
+- Set minimum Home Assistant version to 2025.12.0 in hacs.json
+
 ## [0.1.2] - 2026-01-06
 ### Fixed
 - Bluetooth device path parsing (use parts[-1] instead of parts[-2])
