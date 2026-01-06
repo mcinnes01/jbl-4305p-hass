@@ -1,0 +1,39 @@
+# Services for JBL 4305P Integration
+
+rediscover_inputs:
+  name: Rediscover Inputs
+  description: Re-scan the speaker for available inputs and update the input list. Use after pairing new Bluetooth devices.
+  fields:
+    entry_id:
+      name: Config Entry ID
+      description: The config entry ID to rediscover inputs for (optional, uses current entry if omitted)
+      required: false
+      example: "abc123def456"
+      selector:
+        text:
+
+add_bluetooth_device:
+  name: Add Bluetooth Device
+  description: Add the currently connected Bluetooth device as a selectable input option.
+  fields:
+    entry_id:
+      name: Config Entry ID
+      description: The config entry ID to add the device to (optional)
+      required: false
+      example: "abc123def456"
+      selector:
+        text:
+    name:
+      name: Device Name
+      description: Friendly name for the Bluetooth device (optional, uses device title if omitted)
+      required: false
+      example: "Lounge TV"
+      selector:
+        text:
+    device_path:
+      name: Device Path
+      description: Explicit BlueZ device path (optional, uses currently connected device if omitted)
+      required: false
+      example: "/org/bluez/hci0/dev_64_E7_D8_6D_AD_C3"
+      selector:
+        text:
